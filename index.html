@@ -1,8 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
     <head>
         <meta charset="UTF-8">
-        <a>OLAAAA!</a>
-
+        <link rel="stylesheet" type="text/css" href="style.css">
     </head>
+    <body>
+        <video id="webcam" playsinline></video>
+
+        <!-- Three.js via CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+        <!-- TensorFlow.js + MoveNet via CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+
+        <!-- Seu código -->
+        <script src="main.js"></script>
+    </body>
 </html>
