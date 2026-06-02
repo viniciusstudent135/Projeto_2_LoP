@@ -96,9 +96,19 @@ for(var i = -330; i <= 350; i+=30){
   Pista.add(CriarGround(2,15,corListra, -0.91, i));//adiciona listras a pista
 }
 //---------------------|pista pronta|-----------------------\\
+
+//---------------------|Criação do Cercado|-----------------------\\
+const Cercado = new THREE.Group();
+Cercado.add(CriarGround(700, 2, 0x000000, -0.91, -350));
+Cercado.add(CriarGround(700, 2, 0x000000, -0.91, 350));
+Cercado.add(CriarGround(2, 700, 0x000000, -0.91, 0).rotation.y = Math.PI/2);
+//---------------------|cercado pronto|-----------------------\\
+
+
 scene.background = new THREE.Color(0x87ceeb);//cor do fundo (céu azul claro)
 scene.add(Chao);//adiciona o chão a cena
 scene.add(Pista);//adiciona a pista a cena
+scene.add(Cercado);
 scene.add(carro);//adiciona carro a cena
 
 //reconhece o teclado:
@@ -130,17 +140,32 @@ function moverCarro(){
     carro.position.x += velocidade*Math.sin(carro.rotation.y); 
   }
   if (keys['arrowleft'] || keys['a']){ 
-    rodaDireitaFrente.rotation.y += angulo;
+    if(rodaEsquerdaFrente.rotation.y < Math.PI/6 && rodaDireitaFrente.rotation.y < Math.PI/6){
     rodaEsquerdaFrente.rotation.y += angulo;
+    rodaDireitaFrente.rotation.y += angulo;}
     if(keys['arrowup'] || keys['w'] || keys['arrowdown'] || keys['s']){
         carro.rotation.y += angulo;
     }
   }
   if (keys['arrowright'] || keys['d']){ 
-    rodaDireitaFrente.rotation.y -= angulo;
+    if(rodaEsquerdaFrente.rotation.y > -Math.PI/6 && rodaDireitaFrente.rotation.y > -Math.PI/6){
     rodaEsquerdaFrente.rotation.y -= angulo;
+    rodaDireitaFrente.rotation.y -= angulo;}
     if(keys['arrowup'] || keys['w'] || keys['arrowdown'] || keys['s']){
         carro.rotation.y -= angulo;
+    }
+  }
+
+  if(!keys['d'] && !keys['a']){
+    if(rodaEsquerdaFrente.rotation.y > 0){
+      rodaEsquerdaFrente.rotation.y -= angulo;
+    } else if(rodaEsquerdaFrente.rotation.y < 0){
+      rodaEsquerdaFrente.rotation.y += angulo;
+    }
+    if(rodaDireitaFrente.rotation.y > 0){
+      rodaDireitaFrente.rotation.y -= angulo;
+    } else if(rodaDireitaFrente.rotation.y < 0){  
+      rodaDireitaFrente.rotation.y += angulo;
     }
   }
 }

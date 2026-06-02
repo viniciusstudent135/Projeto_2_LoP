@@ -105,32 +105,47 @@ function updateCamera() {
 var velocidade = 0.45, angulo = 0.03;
 
 function moverCarro() {
+  // ---movimento para frente e para trás---
   if (keys['arrowup']   || keys['w'] || keys['pose_w']) {
     carro.position.z -= velocidade * Math.cos(carro.rotation.y);
     carro.position.x -= velocidade * Math.sin(carro.rotation.y);
   }
   if (keys['arrowdown'] || keys['s'] || keys['pose_s']) {
-    carro.position.z = velocidade * Math.cos(carro.rotation.y);
-    carro.position.x = velocidade * Math.sin(carro.rotation.y);
+    carro.position.z += velocidade * Math.cos(carro.rotation.y);
+    carro.position.x += velocidade * Math.sin(carro.rotation.y);
   }
+
+  // ---movimento para os lados---
   if (keys['arrowleft'] || keys['a'] || keys['pose_a']) {
-    while(rodaEsquerdaFrente.rotation.y < Math.PI/6 && rodaDireitaFrente.rotation.y < Math.PI/6) {
-      rodaEsquerdaFrente.rotation.y += 0.0001;
-      rodaDireitaFrente.rotation.y += 0.0001;
-    }
+    if(rodaEsquerdaFrente.rotation.y < Math.PI/6 && rodaDireitaFrente.rotation.y < Math.PI/6){
+    rodaEsquerdaFrente.rotation.y += angulo;
+    rodaDireitaFrente.rotation.y += angulo;}
     if (keys['arrowup'] || keys['w'] || keys['pose_w'] ||
         keys['arrowdown'] || keys['s'] || keys['pose_s']) {
       carro.rotation.y += angulo;
     }
   }
   if (keys['arrowright'] || keys['d'] || keys['pose_d']) {
-    while(rodaEsquerdaFrente.rotation.y > -Math.PI/6 && rodaDireitaFrente.rotation.y > -Math.PI/6) {
-      rodaEsquerdaFrente.rotation.y -= 0.0001;
-      rodaDireitaFrente.rotation.y -= 0.0001;
-    }
+    if(rodaEsquerdaFrente.rotation.y > -Math.PI/6 && rodaDireitaFrente.rotation.y > -Math.PI/6){
+    rodaEsquerdaFrente.rotation.y -= angulo;
+    rodaDireitaFrente.rotation.y -= angulo;}
     if (keys['arrowup'] || keys['w'] || keys['pose_w'] ||
         keys['arrowdown'] || keys['s'] || keys['pose_s']) {
       carro.rotation.y -= angulo;
+    }
+  }
+
+  // ---volta as rodas para a posição original quando as teclas de direção são soltas---
+  if(!keys['d'] && !keys['a']){
+    if(rodaEsquerdaFrente.rotation.y > 0){
+      rodaEsquerdaFrente.rotation.y -= angulo;
+    } else if(rodaEsquerdaFrente.rotation.y < 0){
+      rodaEsquerdaFrente.rotation.y += angulo;
+    }
+    if(rodaDireitaFrente.rotation.y > 0){
+      rodaDireitaFrente.rotation.y -= angulo;
+    } else if(rodaDireitaFrente.rotation.y < 0){  
+      rodaDireitaFrente.rotation.y += angulo;
     }
   }
 }
