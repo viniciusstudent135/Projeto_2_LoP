@@ -157,12 +157,12 @@ const obstaculos = [CercadoLateral, CercadoLateral2];
 
 // Adiciona as cercas do cercado também
 for (let i = -330; i <= 350; i += 12) {
-  const posteDir = CriarCercado(2, 5, 2, corCerca,  10, 0, i);
-  const posteEsq = CriarCercado(2, 5, 2, corCerca, -10, 0, i);
-  Cercado.add(posteDir);
-  Cercado.add(posteEsq);
-  obstaculos.push(posteDir);
-  obstaculos.push(posteEsq);
+  const cercaDir = CriarCercado(2, 5, 2, corCerca,  10, 0, i);
+  const cercaEsq = CriarCercado(2, 5, 2, corCerca, -10, 0, i);
+  Cercado.add(cercaDir);
+  Cercado.add(cercaEsq);
+  obstaculos.push(cercaDir);
+  obstaculos.push(cercaEsq);
 }
 
 Cercado.position.set(0, 1, 0);//ajusta a posição do cercado para que fique alinhado com a pista

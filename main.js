@@ -1,4 +1,4 @@
-// ─── THREE.JS ───────────────────────────────
+// ------------------ THREE.JS ---------------------
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(100, window.innerWidth/window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
@@ -6,7 +6,31 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 camera.position.z = 10;
 
-// ─── CARRO ──────────────────────────────────
+//--------------------- CONFIGURAÇÃO DE SOMBRAS -----------------------\\
+// Ativa sombras no renderer
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+// Luz ambiente — iluminação base para não ficar escuro demais
+const luzAmbiente = new THREE.AmbientLight(0xffffff, 0.9);
+scene.add(luzAmbiente);
+
+// Luz direcional — simula o sol
+const sol = new THREE.DirectionalLight(0xffffff, 1);
+sol.position.set(20, 40, 20);
+sol.castShadow = true;
+
+// Ajusta a área de sombra (precisa cobrir sua pista)
+sol.shadow.camera.left   = -100;
+sol.shadow.camera.right  =  100;
+sol.shadow.camera.top    =  100;
+sol.shadow.camera.bottom = -100;
+sol.shadow.mapSize.width  = 2048; // qualidade da sombra
+sol.shadow.mapSize.height = 2048;
+
+scene.add(sol);
+
+// ------------------ CARRO ----------------------
 const carro = new THREE.Group();
 const corCarro = 0xe30f00;
 
@@ -16,7 +40,7 @@ var xRelevo = 2, yRelevo = 0.8, zRelevo = 1.7;
 function CriarCorpo(largura, altura, comprimento, posicao_y, cor) {
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(largura, altura, comprimento),
-    new THREE.MeshBasicMaterial({ color: cor })
+    new THREE.MeshLambertMaterial({ color: cor })
   );
   body.position.y = posicao_y;
   return body;
@@ -27,14 +51,10 @@ const relevo = CriarCorpo(xRelevo, yRelevo, zRelevo, 0.5, corCarro);
 carro.add(base);
 carro.add(relevo);
 
-var z_cima = 0.855, z_baixo = 1.54;
-carro.add(CriaSombra(xRelevo, yRelevo, 0, 0.5, z_cima));
-carro.add(CriaSombra(xBase,   yBase,   0, 0,   z_baixo));
-
 function criarRodas(posicao_x, posicao_z, raio_e_altura, pontas, cor) {
   const roda = new THREE.Mesh(
     new THREE.CylinderGeometry(raio_e_altura, raio_e_altura, raio_e_altura, pontas),
-    new THREE.MeshBasicMaterial({ color: cor })
+    new THREE.MeshLambertMaterial({ color: cor })
   );
   roda.rotation.z = Math.PI / 2;
   roda.position.set(posicao_x, -0.6, posicao_z);
@@ -51,7 +71,12 @@ carro.add(rodaEsquerdaTras);
 carro.add(rodaDireitaTras);
 carro.add(rodaEsquerdaFrente);
 
-// ─── PISTA ──────────────────────────────────
+// Para as peças projetarem sombra
+carro.traverse((obj) => {
+  if (obj.isMesh) obj.castShadow = true;
+});
+
+// ------------------ PISTA ---------------------- 
 const corPista  = 0x394039;
 const corChao   = 0x1a6b15;
 const corListra = 0xd1c411;
@@ -60,7 +85,7 @@ const Pista = new THREE.Group();
 function CriarGround(base, altura, cor, posicao_y, posicao_z) {
   const chao = new THREE.Mesh(
     new THREE.PlaneGeometry(base, altura),
-    new THREE.MeshBasicMaterial({ color: cor })
+    new THREE.MeshLambertMaterial({ color: cor })
   );
   chao.rotation.x = -Math.PI / 2;
   chao.position.y = posicao_y;
@@ -70,21 +95,61 @@ function CriarGround(base, altura, cor, posicao_y, posicao_z) {
 
 const Chao = CriarGround(700, 700, corChao, -0.93, 0);
 Pista.add(CriarGround(20, 700, corPista, -0.92, 0));
-for (var i = -330; i <= 350; i += 30) {
+for (let i = -330; i <= 350; i += 30) {
   Pista.add(CriarGround(2, 15, corListra, -0.91, i));
 }
 
+Chao.receiveShadow = true;
+// -------------------- CERCADO --------------------------
+
+function CriarCercado(base, altura, profundidade, cor, posicao_x, posicao_y, posicao_z) {
+  const cercado = new THREE.Mesh(
+    new THREE.BoxGeometry(base, altura, profundidade), // largura, altura, profundidade
+    new THREE.MeshLambertMaterial({ color: cor })
+  );
+  cercado.rotation.y = -Math.PI/2;
+  cercado.position.y = posicao_y;
+  cercado.position.z = posicao_z;
+  cercado.position.x = posicao_x;
+  return cercado;
+}
+const Cercado = new THREE.Group();
+const corCercado = 0xF0E68C;
+const CercadoLateral = CriarCercado(700, 3, 1, corCercado, 10, -0.4, 0);
+const CercadoLateral2 = CriarCercado(700, 3, 1, corCercado, -10, -0.4, 0);
+Cercado.add(CercadoLateral);
+Cercado.add(CercadoLateral2);
+Cercado.receiveShadow = true;
+
+const corCerca = 0x8B4513;
+// Array com todos os objetos que o carro pode colidir
+const obstaculos = [CercadoLateral, CercadoLateral2];
+
+// Adiciona as cercas do cercado também
+for (let i = -330; i <= 350; i += 12) {
+  const cercaDir = CriarCercado(2, 5, 2, corCerca,  10, 0, i);
+  const cercaEsq = CriarCercado(2, 5, 2, corCerca, -10, 0, i);
+  Cercado.add(cercaDir);
+  Cercado.add(cercaEsq);
+  obstaculos.push(cercaDir);
+  obstaculos.push(cercaEsq);
+}
+
+Cercado.position.set(0, 1, 0);//ajusta a posição do cercado para que fique alinhado com a pista
+
+// -------------------- ADICIONANDO A CENA --------------------------
 scene.background = new THREE.Color(0x87ceeb);
 scene.add(Chao);
 scene.add(Pista);
+scene.add(Cercado);
 scene.add(carro);
 
-// ─── TECLADO ────────────────────────────────
+// -------------------- TECLADO --------------------------
 const keys = {};
 window.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
 window.addEventListener('keyup',   (e) => { keys[e.key.toLowerCase()] = false; });
 
-// ─── CÂMERA ACOMPANHA O CARRO ────────────────
+// --------------- CÂMERA ACOMPANHA O CARRO ------------------
 function updateCamera() {
   camera.position.x = carro.position.x + 1.5;
   camera.position.z = carro.position.z + 7;
@@ -92,12 +157,18 @@ function updateCamera() {
   camera.lookAt(carro.position);
 }
 
-// ─── MOVIMENTO DO CARRO ──────────────────────
+// ---------------- MOVIMENTO DO CARRO ----------------------------
 var velocidade = 0.45, angulo = 0.03;
+// Guarda a posição antes de mover para poder voltar em caso de colisão
+var posAnteriorX = 0;
+var posAnteriorZ = 0;
 
 function moverCarro() {
+  // ---salva ultima posição---
+  posAnteriorX = carro.position.x;
+  posAnteriorZ = carro.position.z;
   // ---movimento para frente e para trás---
-  if (keys['arrowup']   || keys['w'] || keys['pose_w']) {
+  if (keys['arrowup'] || keys['w'] || keys['pose_w']) {
     carro.position.z -= velocidade * Math.cos(carro.rotation.y);
     carro.position.x -= velocidade * Math.sin(carro.rotation.y);
   }
@@ -127,7 +198,7 @@ function moverCarro() {
   }
 
   // ---volta as rodas para a posição original quando as teclas de direção são soltas---
-  if(!keys['pose_d'] && !keys['pose_a']){
+  if(!keys['pose_d'] && !keys['pose_a'] && !keys['arrowright'] && !keys['d'] && !keys['arrowleft'] && !keys['a']){
     if(rodaEsquerdaFrente.rotation.y > 0){
       rodaEsquerdaFrente.rotation.y -= angulo;
     } else if(rodaEsquerdaFrente.rotation.y < 0){
@@ -141,7 +212,25 @@ function moverCarro() {
   }
 }
 
-// ─── MOVENET — VARIÁVEIS ─────────────────────
+const caixaCarro = new THREE.Box3();
+
+function verificarColisao() {
+  // Atualiza a caixa do carro na posição atual
+  caixaCarro.setFromObject(carro);
+
+  for (let i = 0; i < obstaculos.length; i++) {
+    const caixaObstaculo = new THREE.Box3().setFromObject(obstaculos[i]);
+
+    if (caixaCarro.intersectsBox(caixaObstaculo)) {
+      // Volta para a posição antes da colisão
+      carro.position.x = posAnteriorX;
+      carro.position.z = posAnteriorZ;
+      break; // Para de checar assim que encontrar uma colisão
+    }
+  }
+}
+
+// ---------------- MOVENET - VARIÁVEIS ------------------ 
 const video  = document.getElementById('webcam');
 const canvas = document.getElementById('canvas');
 const ctx    = canvas.getContext('2d');
@@ -160,7 +249,7 @@ const CONEXOES = [
   [11,13],[13,15],[12,14],[14,16],
 ];
 
-// ─── MOVENET — INTERPRETA POSE ───────────────
+// ------------------ MOVENET - INTERPRETA POSE -------------------
 function interpretarPose(kps) {
   const ombroEsq   = kps[5];
   const ombroDir   = kps[6];
@@ -190,7 +279,7 @@ function interpretarPose(kps) {
   }
 }
 
-// ─── MOVENET — LOOP ──────────────────────────
+// ---------------- MOVENET - LOOP -------------------
 async function loopMoveNet(detector) {
   const poses = await detector.estimatePoses(video);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -236,7 +325,7 @@ async function loopMoveNet(detector) {
   requestAnimationFrame(() => loopMoveNet(detector));
 }
 
-// ─── MOVENET — INICIALIZAÇÃO ─────────────────
+// ---------------- MOVENET - INICIALIZAÇÃO ----------------
 async function iniciarMoveNet() {
   await tf.setBackend('webgl');
   await tf.ready();
@@ -257,10 +346,11 @@ async function iniciarMoveNet() {
   loopMoveNet(detector);
 }
 
-// ─── INICIA TUDO ─────────────────────────────
+// ---------------- INICIA TUDO ----------------
 function animacao() {
   requestAnimationFrame(animacao);
   moverCarro();
+  verificarColisao();
   renderer.render(scene, camera);
   updateCamera();
 }
