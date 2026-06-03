@@ -27,15 +27,6 @@ const relevo = CriarCorpo(xRelevo, yRelevo, zRelevo, 0.5, corCarro);
 carro.add(base);
 carro.add(relevo);
 
-function CriaSombra(base, altura, x, y, z) {
-  const sombra = new THREE.Mesh(
-    new THREE.PlaneGeometry(base, altura),
-    new THREE.MeshBasicMaterial({ color: 0x4f221f })
-  );
-  sombra.position.set(x, y, z);
-  return sombra;
-}
-
 var z_cima = 0.855, z_baixo = 1.54;
 carro.add(CriaSombra(xRelevo, yRelevo, 0, 0.5, z_cima));
 carro.add(CriaSombra(xBase,   yBase,   0, 0,   z_baixo));
@@ -136,7 +127,7 @@ function moverCarro() {
   }
 
   // ---volta as rodas para a posição original quando as teclas de direção são soltas---
-  if(!keys['d'] && !keys['a']){
+  if(!keys['pose_d'] && !keys['pose_a']){
     if(rodaEsquerdaFrente.rotation.y > 0){
       rodaEsquerdaFrente.rotation.y -= angulo;
     } else if(rodaEsquerdaFrente.rotation.y < 0){
