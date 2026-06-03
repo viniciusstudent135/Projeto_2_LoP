@@ -255,21 +255,24 @@ function interpretarPose(kps) {
   const ombroDir   = kps[6];
   const pulsoEsq   = kps[9];
   const pulsoDir   = kps[10];
-  const quadrilEsq = kps[11];
-  const quadrilDir = kps[12];
-
+  const nariz      = kps[0];
+  const orelha_esq = kps[3];
+  const orelha_dir = kps[4];
   keys['pose_w'] = false;
   keys['pose_s'] = false;
   keys['pose_a'] = false;
   keys['pose_d'] = false;
 
-  if (ombroEsq.score > 0.5 && ombroDir.score > 0.5) {
-    const inclinacao = ombroDir.y - ombroEsq.y;
-    console.log(inclinacao);
-    if (inclinacao >  -35 ) keys['pose_d'] = true;
-    if (inclinacao < 20) keys['pose_a'] = true;
+  //movimentando o carro para os lados com base na posição do nariz em relação às orelhas
+  if (nariz.score > 0.5 && orelha_dir.score > 0.5 && orelha_esq.score > 0.5) {
+    const diferenca1 = orelha_dir.x - nariz.x;
+    const diferenca2 = orelha_esq.x - nariz.x;
+    console.log(diferenca1, diferenca2);
+    if (diferenca1 < -100) keys['pose_a'] = true;
+    if (diferenca2 > 100) keys['pose_d'] = true;
   }
 
+  //movimentando o carro para frente e para trás com base na posição dos pulsos em relação aos ombros
   if (pulsoEsq.score > 0.5 && ombroEsq.score > 0.5) {
     if (pulsoEsq.y < ombroEsq.y) keys['pose_w'] = true;
   }
@@ -312,7 +315,7 @@ async function loopMoveNet(detector) {
         const escala  = Math.min(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
         const offsetX = (canvas.width  - video.videoWidth  * escala) / 2;
         const offsetY = (canvas.height - video.videoHeight * escala) / 2;
-        ctx.strokeStyle = 'lime';
+        ctx.strokeStyle = 'cyan';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(canvas.width - (pa.x * escala) - offsetX, (pa.y * escala) + offsetY);
