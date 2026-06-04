@@ -97,6 +97,7 @@ carro.traverse((obj) => {
   if (obj.isMesh) obj.castShadow = true;
 });
 
+carro.position.z = 350;
 /*/efeito do aro da roda
 carro.add(criarRodas(xAro,xRoda,raioAro,pontasAro,corAro));
 carro.add(criarRodas(-xAro,xRoda,raioAro,pontasAro,corAro));
@@ -111,33 +112,47 @@ const corChao = 0x1a6b15;//cor do chão: verde escuro
 const corListra = 0xd1c411;//cor da listra: amarela
 
 const Pista = new THREE.Group();
-function CriarGround(base,altura,cor, posicao_y, posicao_z){
+function CriarGround(base,altura,cor, posicao_x,posicao_y, posicao_z, rotation_x, rotation_z) {
   const chao = new THREE.Mesh(
     new THREE.PlaneGeometry(base, altura),//largura e altura
     new THREE.MeshLambertMaterial({color: cor}) //cor e textura do material (material escolhido = básico, cor sólida)
   );
-  chao.rotation.x = -Math.PI/2;// rotaciona o objeto
+  chao.rotation.x = rotation_x;// rotaciona o objeto
+  chao.rotation.z = rotation_z;
   chao.position.y = posicao_y;
   chao.position.z = posicao_z;//move o objeto na cena em 3d
+  chao.position.x = posicao_x;
   return chao;
 }
 
-const Chao = CriarGround(700,700,corChao, -0.93, 0);//cria um chao de fundo
-Pista.add(CriarGround(20,700,corPista, -0.92, 0));//adiciona asfalto a pista
-for(let i = -330; i <= 350; i+=30){
-  Pista.add(CriarGround(2,15,corListra, -0.91, i));//adiciona listras a pista
-}
+const Chao = CriarGround(1000,1000,corChao, 0, -0.93, 0, -Math.PI/2, 0);//cria um chao de fundo
+const PistaInicio = CriarGround(20,700,corPista, 0, -0.92, 0, -Math.PI/2, 0);//adiciona asfalto a pista
+const PistaCurva1 = CriarGround(20,240,corPista, 110, -0.92, -360, -Math.PI/2, Math.PI/2);//adiciona asfalto lateral a pista
+const PistaVolta = CriarGround(20,700,corPista, 220, -0.92, 0, -Math.PI/2, 0);//adiciona asfalto lateral a pista
+const PistaCurva2 = CriarGround(20,240,corPista, 110, -0.92, 360, -Math.PI/2, Math.PI/2);//adiciona asfalto lateral a pista
+Pista.add(PistaInicio);
+Pista.add(PistaCurva1);
+Pista.add(PistaVolta);
+Pista.add(PistaCurva2);
 
+for(let i = -330; i <= 350; i+=30){
+  Pista.add(CriarGround(2,15,corListra, 0,-0.91, i, -Math.PI/2, 0));//adiciona listras a pista
+  Pista.add(CriarGround(2,15,corListra, 220,-0.91, i, -Math.PI/2, 0));
+}
+for(let i = -75; i <= 125; i+=30){
+  Pista.add(CriarGround(2,15,corListra, i + 90,-0.91, -360, -Math.PI/2, Math.PI/2));
+  Pista.add(CriarGround(2,15,corListra, i + 90,-0.91, 360, -Math.PI/2, Math.PI/2));
+}
 Chao.receiveShadow = true;
 //---------------------|pista pronta|-----------------------\\
 
 //---------------------|Criação do Cercado|-----------------------\\
-function CriarCercado(base, altura, profundidade, cor, posicao_x, posicao_y, posicao_z) {
+function CriarCercado(base, altura, profundidade, cor, posicao_x, posicao_y, posicao_z, rotacao_y) {
   const cercado = new THREE.Mesh(
     new THREE.BoxGeometry(base, altura, profundidade), // largura, altura, profundidade
     new THREE.MeshLambertMaterial({ color: cor })
   );
-  cercado.rotation.y = -Math.PI/2;
+  cercado.rotation.y = rotacao_y;
   cercado.position.y = posicao_y;
   cercado.position.z = posicao_z;
   cercado.position.x = posicao_x;
@@ -145,28 +160,123 @@ function CriarCercado(base, altura, profundidade, cor, posicao_x, posicao_y, pos
 }
 const Cercado = new THREE.Group();
 const corCercado = 0xF0E68C;
-const CercadoLateral = CriarCercado(700, 3, 1, corCercado, 10, -0.4, 0);
-const CercadoLateral2 = CriarCercado(700, 3, 1, corCercado, -10, -0.4, 0);
-Cercado.add(CercadoLateral);
-Cercado.add(CercadoLateral2);
+const CercadoVerticalDir = CriarCercado(700, 3, 1, corCercado, 10, -0.4, 0, -Math.PI/2);
+const CercadoVerticalEsq = CriarCercado(741, 3, 1, corCercado, -10, -0.4, 0, -Math.PI/2);
+const CercadoHorizontalDir = CriarCercado(200, 3, 1, corCercado, 109.5, -0.4, -350, 0);
+const CercadoHorizontalEsq = CriarCercado(240, 3, 1, corCercado, 110, -0.4, -370, 0);
+const CercadoVerticalDir2 = CriarCercado(741, 3, 1, corCercado, 230, -0.4, 0, -Math.PI/2);
+const CercadoVerticalEsq2 = CriarCercado(701, 3, 1, corCercado, 210, -0.4, 0, -Math.PI/2);
+const CercadoHorizontalDir2 = CriarCercado(240, 3, 1, corCercado, 110, -0.4, 370, 0);
+const CercadoHorizontalEsq2 = CriarCercado(200, 3, 1, corCercado, 109.5, -0.4, 350, 0);
+Cercado.add(CercadoVerticalEsq);
+Cercado.add(CercadoVerticalDir);
+Cercado.add(CercadoHorizontalDir);
+Cercado.add(CercadoHorizontalEsq);
+Cercado.add(CercadoVerticalDir2);
+Cercado.add(CercadoVerticalEsq2);
+Cercado.add(CercadoHorizontalDir2);
+Cercado.add(CercadoHorizontalEsq2);
 Cercado.receiveShadow = true;
 
 const corCerca = 0x8B4513;
 // Array com todos os objetos que o carro pode colidir
-const obstaculos = [CercadoLateral, CercadoLateral2];
+const obstaculos = [
+  CercadoVerticalEsq, CercadoVerticalDir, 
+  CercadoHorizontalDir, CercadoHorizontalEsq, 
+  CercadoVerticalDir2, CercadoVerticalEsq2, 
+  CercadoHorizontalDir2, CercadoHorizontalEsq2
+  ];
 
 // Adiciona as cercas do cercado também
-for (let i = -330; i <= 350; i += 12) {
-  const cercaDir = CriarCercado(2, 5, 2, corCerca,  10, 0, i);
-  const cercaEsq = CriarCercado(2, 5, 2, corCerca, -10, 0, i);
-  Cercado.add(cercaDir);
-  Cercado.add(cercaEsq);
-  obstaculos.push(cercaDir);
-  obstaculos.push(cercaEsq);
+for (let i = -335; i <= 355; i += 12) {
+  const cercaVerticalDir = CriarCercado(2, 5, 2, corCerca,  10, 0, i, 0);
+  const cercaVerticalEsq = CriarCercado(2, 5, 2, corCerca, -10, 0, i, 0);
+  const cercaVerticalDir2 = CriarCercado(2, 5, 2, corCerca,  230, 0, i, 0);
+  const cercaVerticalEsq2 = CriarCercado(2, 5, 2, corCerca, 210, 0, i, 0);
+  
+  Cercado.add(cercaVerticalDir);
+  Cercado.add(cercaVerticalEsq);
+  Cercado.add(cercaVerticalDir2);
+  Cercado.add(cercaVerticalEsq2);
+  
+  obstaculos.push(cercaVerticalDir);
+  obstaculos.push(cercaVerticalEsq);
+  obstaculos.push(cercaVerticalDir2);
+  obstaculos.push(cercaVerticalEsq2); 
 }
+for (let i = -75; i <= 125; i += 12) {
+  const cercaHorizontalDir = CriarCercado(2, 5, 2, corCerca, i + 90, 0, -350, -Math.PI/2);
+  const cercaHorizontalEsq = CriarCercado(2, 5, 2, corCerca, i + 90, 0, -370, -Math.PI/2);
+  const cercaHorizontalDir2 = CriarCercado(2, 5, 2, corCerca, i + 90, 0, 350, -Math.PI/2);
+  const cercaHorizontalEsq2 = CriarCercado(2, 5, 2, corCerca, i + 90, 0, 370, -Math.PI/2);
 
+  Cercado.add(cercaHorizontalDir);
+  Cercado.add(cercaHorizontalEsq);
+  Cercado.add(cercaHorizontalDir2);
+  Cercado.add(cercaHorizontalEsq2);
+
+  obstaculos.push(cercaHorizontalDir);
+  obstaculos.push(cercaHorizontalEsq);
+  obstaculos.push(cercaHorizontalDir2);
+  obstaculos.push(cercaHorizontalEsq2);
+}
 Cercado.position.set(0, 1, 0);//ajusta a posição do cercado para que fique alinhado com a pista
 //---------------------|cercado pronto|-----------------------\\
+
+//---------------------|adicionando objetos a cena|-----------------------\\
+function CriarBlocos(base, altura, profundidade, cor, posicao_x, posicao_y, posicao_z) {
+  const bloco = new THREE.Mesh(
+    new THREE.BoxGeometry(base, altura, profundidade), // largura, altura, profundidade
+    new THREE.MeshLambertMaterial({ color: cor })
+  );
+  bloco.position.y = posicao_y;
+  bloco.position.x = posicao_x;
+  bloco.position.z = posicao_z;
+
+  bloco.rotation.y += Math.random() * Math.PI; // Rotaciona o bloco aleatoriamente
+  return bloco;
+}
+
+var Coletaveis = [];
+var Coletados = 0;
+
+for(let i = -300; i <= 300; i+=30){
+  const bloco = CriarBlocos(1, 1, 1, 0xFF4500, 0, 0.3 , i);
+  const bloco2 = CriarBlocos(1, 1, 1, 0xFF4500, 220, 0.3 , i);
+  Coletaveis.push(bloco);
+  Coletaveis.push(bloco2);
+  scene.add(bloco);
+  scene.add(bloco2);
+}
+for(let i = -75; i <= 125; i+=30){
+  const bloco = CriarBlocos(1, 1, 1, 0xFF4500, i + 90, 0.3 , -360);
+  const bloco2 = CriarBlocos(1, 1, 1, 0xFF4500, i + 90, 0.3 , 360);
+  Coletaveis.push(bloco);
+  Coletaveis.push(bloco2);
+  scene.add(bloco);
+  scene.add(bloco2);
+}
+
+function ColetarBlocos(){
+  const caixaCarro = new THREE.Box3().setFromObject(carro);
+  for (let i = Coletaveis.length - 1; i >= 0; i--) {
+    const caixaBloco = new THREE.Box3().setFromObject(Coletaveis[i]);
+    if (caixaCarro.intersectsBox(caixaBloco)) {
+      scene.remove(Coletaveis[i]);
+      Coletaveis.splice(i, 1);
+      Coletados++;
+      document.getElementById('score').textContent = `Cubinhos: ${Coletados}/${Coletaveis.length+Coletados}`;
+    }
+  }
+  function animacaoBlocos() {
+    Coletaveis.forEach(bloco => {
+      bloco.rotation.y += 0.03; // Rotaciona o bloco em torno do eixo Y
+    });
+  }  
+  animacaoBlocos();
+}
+
+//---------------------|objetos prontos|-----------------------\\
 
 scene.background = new THREE.Color(0x87ceeb);//cor do fundo (céu azul claro)
 scene.add(Chao);//adiciona o chão a cena
@@ -191,7 +301,7 @@ function updateCamera() {
   camera.lookAt(carro.position); //camera acompanha o carro
 }
 
-var velocidade = 0.4, angulo = 0.04;
+var velocidade = 1.4, angulo = 0.04;
 // Guarda a posição antes de mover para poder voltar em caso de colisão
 var posAnteriorX = 0;
 var posAnteriorZ = 0;
@@ -261,6 +371,7 @@ function animacao(){
   requestAnimationFrame(animacao);
   moverCarro();
   verificarColisao();
+  ColetarBlocos();
   renderer.render(scene, camera);
   updateCamera();
 }

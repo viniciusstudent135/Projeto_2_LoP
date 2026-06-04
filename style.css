@@ -20,3 +20,12 @@ body { overflow: hidden; background: #000; }
   z-index: 11;
   pointer-events: none;
 }
+
+#score {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  font-size: 28px;
+  color: #fff;
+  z-index: 10;
+}

@@ -137,6 +137,47 @@ for (let i = -330; i <= 350; i += 12) {
 
 Cercado.position.set(0, 1, 0);//ajusta a posição do cercado para que fique alinhado com a pista
 
+//--------------------- ADICIONANDO BLOCOS COLETAVEIS -----------------------
+
+function CriarBlocos(base, altura, profundidade, cor, posicao_x, posicao_y, posicao_z) {
+  const bloco = new THREE.Mesh(
+    new THREE.BoxGeometry(base, altura, profundidade), // largura, altura, profundidade
+    new THREE.MeshLambertMaterial({ color: cor })
+  );
+  bloco.position.y = posicao_y;
+  bloco.position.x = posicao_x;
+  bloco.position.z = posicao_z;
+
+  bloco.rotation.y += Math.random() * Math.PI; // Rotaciona o bloco aleatoriamente
+  return bloco;
+}
+
+var Coletaveis = [];
+
+for(let i = -300; i <= 300; i+=30){
+  const bloco = CriarBlocos(1, 1, 1, 0xFF4500, 0, 0.3 , i);
+  Coletaveis.push(bloco);
+  scene.add(bloco);
+}
+
+function ColetarBlocos(){
+  const caixaCarro = new THREE.Box3().setFromObject(carro);
+  for (let i = Coletaveis.length - 1; i >= 0; i--) {
+    const caixaBloco = new THREE.Box3().setFromObject(Coletaveis[i]);
+    if (caixaCarro.intersectsBox(caixaBloco)) {
+      scene.remove(Coletaveis[i]);
+      Coletaveis.splice(i, 1);
+    }
+  }
+  function animacaoBlocos() {
+    Coletaveis.forEach(bloco => {
+      bloco.rotation.y += 0.03; // Rotaciona o bloco em torno do eixo Y
+    });
+  }
+  
+  animacaoBlocos();
+}
+
 // -------------------- ADICIONANDO A CENA --------------------------
 scene.background = new THREE.Color(0x87ceeb);
 scene.add(Chao);
@@ -353,6 +394,7 @@ async function iniciarMoveNet() {
 function animacao() {
   requestAnimationFrame(animacao);
   moverCarro();
+  ColetarBlocos();
   verificarColisao();
   renderer.render(scene, camera);
   updateCamera();
