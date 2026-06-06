@@ -119,12 +119,12 @@ for(let i = -75; i <= 125; i+=30){
 Chao.receiveShadow = true;
 // -------------------- CERCADO --------------------------
 
-function CriarCercado(largura, altura, profundidade, cor, posicao_x, posicao_y, posicao_z) {
+function CriarCercado(largura, altura, profundidade, cor, posicao_x, posicao_y, posicao_z, rotation_y) {
   const cercado = new THREE.Mesh(
     new THREE.BoxGeometry(largura, altura, profundidade), // largura, altura, profundidade
     new THREE.MeshLambertMaterial({ color: cor })
   );
-  cercado.rotation.y = -Math.PI/2;
+  cercado.rotation.y = rotation_y;
   cercado.position.y = posicao_y;
   cercado.position.z = posicao_z;
   cercado.position.x = posicao_x;
