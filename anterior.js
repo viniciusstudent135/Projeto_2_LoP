@@ -147,9 +147,9 @@ Chao.receiveShadow = true;
 //---------------------|pista pronta|-----------------------\\
 
 //---------------------|Criação do Cercado|-----------------------\\
-function CriarCercado(base, altura, profundidade, cor, posicao_x, posicao_y, posicao_z, rotacao_y) {
+function CriarCercado(largura, altura, profundidade, cor, posicao_x, posicao_y, posicao_z, rotacao_y) {
   const cercado = new THREE.Mesh(
-    new THREE.BoxGeometry(base, altura, profundidade), // largura, altura, profundidade
+    new THREE.BoxGeometry(largura, altura, profundidade), // largura, altura, profundidade
     new THREE.MeshLambertMaterial({ color: cor })
   );
   cercado.rotation.y = rotacao_y;
@@ -178,7 +178,6 @@ Cercado.add(CercadoHorizontalDir2);
 Cercado.add(CercadoHorizontalEsq2);
 Cercado.receiveShadow = true;
 
-const corCerca = 0x8B4513;
 // Array com todos os objetos que o carro pode colidir
 const obstaculos = [
   CercadoVerticalEsq, CercadoVerticalDir, 
@@ -188,12 +187,13 @@ const obstaculos = [
   ];
 
 // Adiciona as cercas do cercado também
+const corCerca = 0x8B4513;
+
 for (let i = -335; i <= 355; i += 12) {
   const cercaVerticalDir = CriarCercado(2, 5, 2, corCerca,  10, 0, i, 0);
   const cercaVerticalEsq = CriarCercado(2, 5, 2, corCerca, -10, 0, i, 0);
   const cercaVerticalDir2 = CriarCercado(2, 5, 2, corCerca,  230, 0, i, 0);
-  const cercaVerticalEsq2 = CriarCercado(2, 5, 2, corCerca, 210, 0, i, 0);
-  
+  const cercaVerticalEsq2 = CriarCercado(2, 5, 2, corCerca, 210, 0, i, 0);  
   Cercado.add(cercaVerticalDir);
   Cercado.add(cercaVerticalEsq);
   Cercado.add(cercaVerticalDir2);
@@ -209,7 +209,6 @@ for (let i = -75; i <= 125; i += 12) {
   const cercaHorizontalEsq = CriarCercado(2, 5, 2, corCerca, i + 90, 0, -370, -Math.PI/2);
   const cercaHorizontalDir2 = CriarCercado(2, 5, 2, corCerca, i + 90, 0, 350, -Math.PI/2);
   const cercaHorizontalEsq2 = CriarCercado(2, 5, 2, corCerca, i + 90, 0, 370, -Math.PI/2);
-
   Cercado.add(cercaHorizontalDir);
   Cercado.add(cercaHorizontalEsq);
   Cercado.add(cercaHorizontalDir2);
@@ -220,20 +219,19 @@ for (let i = -75; i <= 125; i += 12) {
   obstaculos.push(cercaHorizontalDir2);
   obstaculos.push(cercaHorizontalEsq2);
 }
-Cercado.position.set(0, 1, 0);//ajusta a posição do cercado para que fique alinhado com a pista
+Cercado.position.set(0, 1, 0);//ajusta a posição do cercado para ficar na altura certa
 //---------------------|cercado pronto|-----------------------\\
 
 //---------------------|adicionando objetos a cena|-----------------------\\
-function CriarBlocos(base, altura, profundidade, cor, posicao_x, posicao_y, posicao_z) {
+function CriarBlocos(largura, altura, profundidade, cor, posicao_x, posicao_y, posicao_z) {
   const bloco = new THREE.Mesh(
-    new THREE.BoxGeometry(base, altura, profundidade), // largura, altura, profundidade
+    new THREE.BoxGeometry(largura, altura, profundidade), // largura, altura, profundidade
     new THREE.MeshLambertMaterial({ color: cor })
   );
   bloco.position.y = posicao_y;
   bloco.position.x = posicao_x;
   bloco.position.z = posicao_z;
 
-  bloco.rotation.y += Math.random() * Math.PI; // Rotaciona o bloco aleatoriamente
   return bloco;
 }
 
@@ -241,20 +239,20 @@ var Coletaveis = [];
 var Coletados = 0;
 
 for(let i = -300; i <= 300; i+=30){
-  const bloco = CriarBlocos(1, 1, 1, 0xFF4500, 0, 0.3 , i);
-  const bloco2 = CriarBlocos(1, 1, 1, 0xFF4500, 220, 0.3 , i);
-  Coletaveis.push(bloco);
-  Coletaveis.push(bloco2);
-  scene.add(bloco);
-  scene.add(bloco2);
+  const blocoPistaEsq = CriarBlocos(1, 1, 1, 0xFF4500, 0, 0.3 , i);
+  const blocoPistaDir = CriarBlocos(1, 1, 1, 0xFF4500, 220, 0.3 , i);
+  Coletaveis.push(blocoPistaEsq);
+  Coletaveis.push(blocoPistaDir);
+  scene.add(blocoPistaEsq);
+  scene.add(blocoPistaDir);
 }
 for(let i = -75; i <= 125; i+=30){
-  const bloco = CriarBlocos(1, 1, 1, 0xFF4500, i + 90, 0.3 , -360);
-  const bloco2 = CriarBlocos(1, 1, 1, 0xFF4500, i + 90, 0.3 , 360);
-  Coletaveis.push(bloco);
-  Coletaveis.push(bloco2);
-  scene.add(bloco);
-  scene.add(bloco2);
+  const blocoPistaFrontal = CriarBlocos(1, 1, 1, 0xFF4500, i + 90, 0.3 , -360);
+  const blocoPistaTraseiro = CriarBlocos(1, 1, 1, 0xFF4500, i + 90, 0.3 , 360);
+  Coletaveis.push(blocoPistaFrontal);
+  Coletaveis.push(blocoPistaTraseiro);
+  scene.add(blocoPistaFrontal);
+  scene.add(blocoPistaTraseiro);
 }
 
 function ColetarBlocos(){
@@ -301,7 +299,7 @@ function updateCamera() {
   camera.lookAt(carro.position); //camera acompanha o carro
 }
 
-var velocidade = 1.4, angulo = 0.04;
+var velocidade = 0.45, angulo = 0.04;
 // Guarda a posição antes de mover para poder voltar em caso de colisão
 var posAnteriorX = 0;
 var posAnteriorZ = 0;
