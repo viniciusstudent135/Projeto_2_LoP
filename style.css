@@ -1,12 +1,12 @@
 * { margin: 0; padding: 0; }
 body { overflow: hidden; background: #000; }
-
+/*fazer mesmas alterações no canvas para teste1 em tela cheia*/
 #webcam {
   position: fixed;
-  bottom: 16px;
-  right: 16px;
-  width: 200px;
-  height: 150px;
+  bottom: 16px; /*para teste1: 0*/
+  right: 16px; /*para teste1: 0*/
+  width: 200px; /*para teste1: 100vw*/
+  height: 150px; /*para teste1: 100vh*/
   transform: scaleX(-1);
   z-index: 10;
 }

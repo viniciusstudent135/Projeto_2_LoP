@@ -42,8 +42,8 @@ scene.add(sol);
 const carro = new THREE.Group();
 const corCarro = 0xe30f00; // cinza quase brancod3d3d3
 //corpo do carro
-var xBase = 2, yBase = 0.85, zBase = 3;
-var xRelevo = 2, yRelevo = 0.8, zRelevo = 1.7;
+var xBase = 2, yBase = 0.85, zBase = 4;
+var xRelevo = 2, yRelevo = 0.85, zRelevo = 2.4;
 function CriarCorpo(largura,altura,comprimento,posicao_y, cor){
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(largura, altura, comprimento),//largura,altura,comprimento
@@ -57,20 +57,42 @@ const relevo = CriarCorpo(xRelevo, yRelevo, zRelevo, 0.5, corCarro);
 carro.add(base);
 carro.add(relevo);
 
-//sombras do carro
-function CriaSombra(base, altura,x,y,z){
-  const sombra = new THREE.Mesh(
-    new THREE.PlaneGeometry(base,altura),
-    new THREE.MeshLambertMaterial({color: 0x4f221f})//antes 808080
+function CriarDetalhes(largura, altura, profundidade, posicao_y, cor) {
+  const detalhe = new THREE.Mesh(
+    new THREE.BoxGeometry(largura, altura, profundidade),
+    new THREE.MeshLambertMaterial({ color: cor })
   );
-  sombra.position.set(x,y,z);
-  return sombra;
+  detalhe.position.y = posicao_y;
+  return detalhe;
 }
-var z_cima = 0.855,z_baixo=1.54; //posições das sombras
-const sombraRelevo = CriaSombra(xRelevo,yRelevo, 0,0.5,z_cima);
-const sombraBase = CriaSombra(xBase,yBase, 0,0,z_baixo);
-carro.add(sombraRelevo);
-carro.add(sombraBase);
+const corJanela = 0x87ceeb;
+const janelaFrente = CriarDetalhes(1.5, 0.5, 0.1, 0.6, corJanela);
+const janelaTras   = CriarDetalhes(1.5, 0.5, 0.1, 0.6, corJanela);
+const janelaLateralDir = CriarDetalhes(0.1, 0.5, 1, 0.6, corJanela);
+const janelaLateralEsq = CriarDetalhes(0.1, 0.5, 1, 0.6, corJanela);
+janelaFrente.position.z = -1.16;
+janelaTras.position.z = 1.16;
+janelaLateralDir.position.x = 0.96;
+janelaLateralEsq.position.x = -0.96;
+carro.add(janelaFrente);
+carro.add(janelaTras);
+carro.add(janelaLateralDir);
+carro.add(janelaLateralEsq);
+
+const corFaroisFrente = 0xffff00;
+const corFaroisTras = 0xff0000;
+const farolFrenteDir = CriarDetalhes(0.3, 0.3, 0.1, 0.2, corFaroisFrente);
+const farolFrenteEsq = CriarDetalhes(0.3, 0.3, 0.1, 0.2, corFaroisFrente);
+const farolTrasDir = CriarDetalhes(0.3, 0.3, 0.1, 0.2, corFaroisTras);
+const farolTrasEsq = CriarDetalhes(0.3, 0.3, 0.1, 0.2, corFaroisTras);
+farolFrenteDir.position.set(0.5, 0.2, -2);//1.75
+farolFrenteEsq.position.set(-0.5, 0.2, -2);
+farolTrasDir.position.set(0.5, 0.2, 2);
+farolTrasEsq.position.set(-0.5, 0.2, 2);
+carro.add(farolFrenteDir);
+carro.add(farolFrenteEsq);
+carro.add(farolTrasDir);
+carro.add(farolTrasEsq);
 
 //rodas
 function criarRodas(posicao_x,posicao_z, raio_e_altura,pontas, cor){
@@ -79,14 +101,14 @@ function criarRodas(posicao_x,posicao_z, raio_e_altura,pontas, cor){
     new THREE.MeshLambertMaterial({ color: cor })
   );
   roda.rotation.z = Math.PI/2;// rotaciona o objeto em 90 graus no eixo z
-  roda.position.set(posicao_x, -0.6,posicao_z);
+  roda.position.set(posicao_x, -0.5,posicao_z);
   return roda;
 }
-const xRoda = 0.9, xAro = 0.97, raioRoda=0.4, raioAro= 0.3, pontasRoda=8, pontasAro=6, corRoda = 0x000000, corAro= 0x808080;
-const rodaDireitaTras = criarRodas(xRoda,xRoda, raioRoda,pontasRoda,corRoda);
-const rodaEsquerdaTras = criarRodas(-xRoda,xRoda, raioRoda,pontasRoda,corRoda);
-const rodaDireitaFrente = criarRodas(xRoda,-xRoda, raioRoda,pontasRoda,corRoda);
-const rodaEsquerdaFrente = criarRodas(-xRoda,-xRoda, raioRoda,pontasRoda,corRoda);
+const xRoda = 0.9, zRoda = 1, raioRoda=0.5, pontasRoda=8, corRoda = 0x000000;
+const rodaDireitaTras = criarRodas(xRoda,zRoda, raioRoda,pontasRoda,corRoda);
+const rodaEsquerdaTras = criarRodas(-xRoda,zRoda, raioRoda,pontasRoda,corRoda);
+const rodaDireitaFrente = criarRodas(xRoda,-zRoda, raioRoda,pontasRoda,corRoda);
+const rodaEsquerdaFrente = criarRodas(-xRoda,-zRoda, raioRoda,pontasRoda,corRoda);
 carro.add(rodaDireitaFrente);
 carro.add(rodaEsquerdaTras);
 carro.add(rodaDireitaTras);
@@ -98,13 +120,7 @@ carro.traverse((obj) => {
 });
 
 carro.position.z = 350;
-/*/efeito do aro da roda
-carro.add(criarRodas(xAro,xRoda,raioAro,pontasAro,corAro));
-carro.add(criarRodas(-xAro,xRoda,raioAro,pontasAro,corAro));
-carro.add(criarRodas(xAro,-xRoda,raioAro,pontasAro,corAro));
-carro.add(criarRodas(-xAro,-xRoda,raioAro,pontasAro,corAro));
-
-*///---------------------|carro pronto|-----------------------\\
+//---------------------|carro pronto|-----------------------\\
 
 //---------------------|criação da pista|-----------------------\\
 const corPista = 0x394039;//cor da pista: cinza escuro

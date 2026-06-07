@@ -1,6 +1,6 @@
-const video  = document.getElementById('webcam');
+const video = document.getElementById('webcam');
 const canvas = document.getElementById('canvas');
-const ctx    = canvas.getContext('2d');
+const ctx = canvas.getContext('2d');
 
 // Nomes dos 17 pontos — use para identificar cada índice
 const NOMES = [
@@ -49,7 +49,7 @@ async function main() {
   await new Promise(r => video.onloadedmetadata = r);
   await video.play();
 
-  canvas.width  = window.innerWidth;
+  canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
   loop(detector);
@@ -62,19 +62,15 @@ async function loop(detector) {
   if (poses.length > 0) {
     const kps = poses[0].keypoints;
 
-    ctx.save();
-    ctx.scale(-1, 1);
-    ctx.translate(-canvas.width, 0);
-
     // ─── DESENHA OS PONTOS ───────────────────────
     // Fator de escala entre o vídeo real e a tela
-    const escalaX = (canvas.width) / (video.videoWidth) * 1.002;
+    const escalaX = (canvas.width) / (video.videoWidth);
     const escalaY = (canvas.height) / (video.videoHeight);
 
     kps.forEach((kp, i) => {
         if (kp.score > 0.5) {
     // Multiplica as coordenadas pelo fator de escala
-            const x = kp.x * escalaX;
+            const x = canvas.width - (kp.x * escalaX);
             const y = kp.y * escalaY;
 
             ctx.fillStyle = 'lime';
@@ -96,16 +92,13 @@ async function loop(detector) {
             ctx.strokeStyle = 'lime';
             ctx.lineWidth = 4;
             ctx.beginPath();
-            ctx.moveTo(pa.x * escalaX, pa.y * escalaY);
-            ctx.lineTo(pb.x * escalaX, pb.y * escalaY);
+            ctx.moveTo(canvas.width - (pa.x * escalaX), pa.y * escalaY);
+            ctx.lineTo(canvas.width - (pb.x * escalaX), pb.y * escalaY);
             ctx.stroke();
         }
     });
 
-    ctx.restore();
-
   }
-
   requestAnimationFrame(() => loop(detector));
 }
 
